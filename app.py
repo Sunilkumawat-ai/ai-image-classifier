@@ -4,8 +4,7 @@ import requests
 import os
 
 # Hugging Face API
-API_URL = "https://api-inference.huggingface.co/models/google/vit-base-patch16-224"
-
+API_URL = "https://api-inference.huggingface.co/models/facebook/detr-resnet-50"
 headers = {
     "Authorization": "Bearer " + str(os.getenv("HF_TOKEN"))
 }
