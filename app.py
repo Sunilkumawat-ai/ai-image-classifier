@@ -1,38 +1,54 @@
 import streamlit as st
 from PIL import Image
-import numpy as np
-from ultralytics import YOLO
-
-model = YOLO("yolov8n.pt")
+from transformers import pipeline
 
 # ---------------- UI ----------------
-st.set_page_config(page_title="AI Object Detector", layout="centered")
+st.set_page_config(
+    page_title="AI Image Classifier Pro",
+    page_icon="🔍",
+    layout="centered"
+)
 
-st.title("🔍 AI Object Detection (YOLOv8)")
-st.markdown("Upload image and detect real objects")
+st.title("🔍 AI Image Classifier Pro")
+st.markdown("Upload an image and get AI prediction")
 
-# ---------------- LOAD MODEL ----------------
+# ---------------- MODEL (STABLE - NO CRASH) ----------------
 @st.cache_resource
 def load_model():
-    return YOLO("yolov8n.pt")  # pretrained model
+    return pipeline(
+        "image-classification",
+        model="google/vit-base-patch16-224"
+    )
 
-model = load_model()
+classifier = load_model()
 
-# ---------------- UPLOAD ----------------
-uploaded_file = st.file_uploader("Upload Image", type=["jpg", "png", "jpeg"])
+# ---------------- PREDICTION ----------------
+def predict(image):
+    results = classifier(image)
+    top = results[0]
+    label = top["label"]
+    confidence = top["score"] * 100
+    return label, confidence
+
+# ---------------- CONFIDENCE STATUS ----------------
+def confidence_status(conf):
+    if conf > 80:
+        return "🟢 Very Confident"
+    elif conf > 50:
+        return "🟡 Medium Confidence"
+    else:
+        return "🔴 Low Confidence"
+
+# ---------------- MAIN APP ----------------
+uploaded_file = st.file_uploader("📤 Upload Image", type=["jpg", "png", "jpeg"])
 
 if uploaded_file:
     image = Image.open(uploaded_file)
     st.image(image, use_container_width=True)
 
-    with st.spinner("Detecting objects..."):
-        results = model(image)
+    with st.spinner("🤖 AI analyzing image..."):
+        label, confidence = predict(image)
 
-    result = results[0]
-
-    # plot image with boxes
-    plotted = result.plot()
-
-    st.image(plotted, caption="Detected Objects")
-
-    st.success("Detection complete ✔️")
+    st.success(f"🎯 Prediction: {label}")
+    st.info(f"Confidence: {confidence:.2f}%")
+    st.write(confidence_status(confidence))
