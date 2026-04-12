@@ -1,23 +1,37 @@
 import streamlit as st
 from PIL import Image
-from transformers import pipeline
+import torch
+from torchvision import models, transforms
 
-st.title("🧠 AI Image Understanding")
+# Load pretrained model
+model = models.resnet18(pretrained=True)
+model.eval()
 
-file = st.file_uploader("Upload Image", type=["jpg","jpeg","png"])
+# Image transform
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+])
 
-# ✔️ correct pipeline task
-model = pipeline(
-    "image-to-text",
-    model="Salesforce/blip-image-captioning-base"
-)
+# Load labels
+import requests
+labels = requests.get("https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt").text.splitlines()
 
-if file:
-    image = Image.open(file)
-    st.image(image, use_column_width=True)
+st.title("🧠 Image Recognition AI")
+st.write("Upload an image and AI will predict what it is")
 
-    st.write("### 🔍 Final Answer:")
+uploaded_file = st.file_uploader("Choose an image", type=["jpg", "png", "jpeg"])
 
-    result = model(image)
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    st.success(result[0]["generated_text"])
+    img = transform(image).unsqueeze(0)
+
+    with torch.no_grad():
+        outputs = model(img)
+        _, predicted = torch.max(outputs, 1)
+        label = labels[predicted.item()]
+
+    st.subheader("Prediction:")
+    st.success(label)
