@@ -1,3 +1,2 @@
 streamlit
-pillow==9.5.0
-requests
+numpy
