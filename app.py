@@ -3,8 +3,8 @@ import requests
 
 st.set_page_config(page_title="AI Image Classifier", layout="centered")
 
-st.title("🧠 AI Image Classifier (Real AI)")
-st.write("Upload an image to detect objects (dog, cat, etc.)")
+st.title("🧠 AI Image Classifier")
+st.write("Upload an image and AI will tell what it is")
 
 file = st.file_uploader("Upload Image", type=["jpg","png","jpeg"])
 
@@ -13,20 +13,32 @@ if file:
 
     st.write("### 🔍 Prediction:")
 
-    API_URL = "https://api-inference.huggingface.co/models/facebook/detr-resnet-50"
-
-    response = requests.post(API_URL, data=file.getvalue())
+    API_URL = "https://api-inference.huggingface.co/models/google/vit-base-patch16-224"
 
     try:
+        response = requests.post(
+            API_URL,
+            data=file.getvalue(),
+            timeout=60
+        )
+
         result = response.json()
 
         if isinstance(result, list):
-            for obj in result[:3]:
-                label = obj.get("label", "Unknown")
-                score = obj.get("score", 0)
-                st.write(f"{label} - {round(score*100,2)}%")
-        else:
-            st.error("AI couldn't process image. Try another image.")
+            top = result[0]   # best prediction
 
-    except:
-        st.error("Error connecting to AI. Try again.")
+            label = top.get("label", "Unknown")
+            score = top.get("score", 0)
+
+            st.success(f"👉 {label} ({round(score*100,2)}%)")
+
+            # show top 3 results
+            st.write("### Other possibilities:")
+            for r in result[:3]:
+                st.write(f"- {r['label']} : {round(r['score']*100,2)}%")
+
+        else:
+            st.error(result)
+
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
