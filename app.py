@@ -1,37 +1,37 @@
 import streamlit as st
 from PIL import Image
-import torch
-from torchvision import models, transforms
+import numpy as np
+import tensorflow as tf
 
-# Load pretrained model
-model = models.resnet18(pretrained=True)
-model.eval()
+st.title("🔍 Image Classification AI")
 
-# Image transform
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-])
+model = tf.keras.applications.MobileNetV2(weights="imagenet")
 
-# Load labels
-import requests
-labels = requests.get("https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt").text.splitlines()
+def predict(image):
+    image = image.resize((224, 224))
 
-st.title("🧠 Image Recognition AI")
-st.write("Upload an image and AI will predict what it is")
+    img_array = np.array(image)
+    img_array = np.expand_dims(img_array, axis=0)
 
-uploaded_file = st.file_uploader("Choose an image", type=["jpg", "png", "jpeg"])
+    img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
+
+    prediction = model.predict(img_array)
+
+    result = tf.keras.applications.mobilenet_v2.decode_predictions(prediction, top=1)[0][0]
+
+    label = result[1]
+    confidence = result[2] * 100
+
+    return label, confidence
+
+
+uploaded_file = st.file_uploader("Upload Image", type=["jpg", "png", "jpeg"])
 
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image)
 
-    img = transform(image).unsqueeze(0)
+    label, confidence = predict(image)
 
-    with torch.no_grad():
-        outputs = model(img)
-        _, predicted = torch.max(outputs, 1)
-        label = labels[predicted.item()]
-
-    st.subheader("Prediction:")
-    st.success(label)
+    st.success(f"Prediction: {label}")
+    st.info(f"Confidence: {confidence:.2f}%")
