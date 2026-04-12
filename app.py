@@ -1,26 +1,18 @@
 import streamlit as st
 from PIL import Image
-import numpy as np
-import keras
+from transformers import pipeline
 
-st.title("🔍 Image Classification AI (Fixed Version)")
+st.title("🔍 Image Classification AI")
 
-model = keras.applications.MobileNetV2(weights="imagenet")
+# Load pretrained model (no tensorflow needed)
+classifier = pipeline("image-classification")
 
 def predict(image):
-    image = image.resize((224, 224))
+    results = classifier(image)
 
-    img_array = np.array(image)
-    img_array = np.expand_dims(img_array, axis=0)
-
-    img_array = keras.applications.mobilenet_v2.preprocess_input(img_array)
-
-    prediction = model.predict(img_array)
-
-    result = keras.applications.mobilenet_v2.decode_predictions(prediction, top=1)[0][0]
-
-    label = result[1]
-    confidence = result[2] * 100
+    top = results[0]
+    label = top["label"]
+    confidence = top["score"] * 100
 
     return label, confidence
 
