@@ -1,11 +1,11 @@
 import streamlit as st
-from PIL import Image
 import numpy as np
+from PIL import Image
 
 st.set_page_config(page_title="AI Image Classifier", layout="centered")
 
 st.title("🧠 AI Image Classifier")
-st.write("Upload an image to analyze brightness and color")
+st.write("Upload an image to analyze brightness")
 
 file = st.file_uploader("Upload Image", type=["jpg","png","jpeg"])
 
@@ -14,12 +14,11 @@ if file:
     st.image(img, caption="Uploaded Image", use_column_width=True)
 
     img_array = np.array(img)
-
-    avg_brightness = img_array.mean()
+    avg = img_array.mean()
 
     st.write("### 🔍 Result:")
 
-    if avg_brightness > 150:
-        st.success("🌞 Bright Image (Day / Outdoor)")
+    if avg > 150:
+        st.success("🌞 Bright Image")
     else:
-        st.info("🌑 Dark Image (Night / Low Light)")
+        st.info("🌑 Dark Image")
