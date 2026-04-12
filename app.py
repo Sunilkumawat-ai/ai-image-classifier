@@ -2,12 +2,15 @@ import streamlit as st
 from PIL import Image
 from transformers import pipeline
 
-st.title("🧠 AI Image Classifier (Smart One Answer)")
+st.title("🧠 AI Image Understanding")
 
 file = st.file_uploader("Upload Image", type=["jpg","jpeg","png"])
 
-# 🔥 Image Captioning AI (NO LABELS NEEDED)
-model = pipeline("image-to-text", model="Salesforce/blip-image-captioning-base")
+# ✔️ correct pipeline task
+model = pipeline(
+    "image-to-text",
+    model="Salesforce/blip-image-captioning-base"
+)
 
 if file:
     image = Image.open(file)
@@ -17,7 +20,4 @@ if file:
 
     result = model(image)
 
-    # ONLY ONE OUTPUT
-    answer = result[0]["generated_text"]
-
-    st.success(answer)
+    st.success(result[0]["generated_text"])
