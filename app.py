@@ -1,11 +1,11 @@
 import streamlit as st
 from PIL import Image
 import numpy as np
-import tensorflow as tf
+import keras
 
-st.title("🔍 Image Classification AI")
+st.title("🔍 Image Classification AI (Fixed Version)")
 
-model = tf.keras.applications.MobileNetV2(weights="imagenet")
+model = keras.applications.MobileNetV2(weights="imagenet")
 
 def predict(image):
     image = image.resize((224, 224))
@@ -13,11 +13,11 @@ def predict(image):
     img_array = np.array(image)
     img_array = np.expand_dims(img_array, axis=0)
 
-    img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
+    img_array = keras.applications.mobilenet_v2.preprocess_input(img_array)
 
     prediction = model.predict(img_array)
 
-    result = tf.keras.applications.mobilenet_v2.decode_predictions(prediction, top=1)[0][0]
+    result = keras.applications.mobilenet_v2.decode_predictions(prediction, top=1)[0][0]
 
     label = result[1]
     confidence = result[2] * 100
