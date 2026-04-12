@@ -1,40 +1,34 @@
 import streamlit as st
-import numpy as np
 from PIL import Image
-import tensorflow as tf
+import requests
+import os
 
-# Load model
-model = tf.keras.applications.MobileNetV2(weights='imagenet')
+API_URL = "https://api-inference.huggingface.co/models/google/vit-base-patch16-224"
 
-# Process image
-def process_image(image):
-    image = image.resize((224,224))
-    img = np.array(image)
-    img = np.expand_dims(img, axis=0)
-    img = tf.keras.applications.mobilenet_v2.preprocess_input(img)
-    return img
+headers = {
+    "Authorization": "Bearer " + os.getenv("HF_TOKEN")
+}
 
-# Predict
-def predict(image):
-    img = process_image(image)
-    preds = model.predict(img)
-    decoded = tf.keras.applications.mobilenet_v2.decode_predictions(preds, top=3)[0]
-    return decoded
+def query(image):
+    response = requests.post(API_URL, headers=headers, data=image)
+    return response.json()
 
-# UI
 st.set_page_config(page_title="AI Image Classifier", layout="centered")
 
-st.title("🧠 AI Image Classifier")
-st.write("Upload an image and get AI predictions")
+st.title("🧠 AI Image Classifier (Real AI)")
+st.write("Upload an image to get AI prediction")
 
-file = st.file_uploader("Choose Image", type=["jpg","png","jpeg"])
+file = st.file_uploader("Upload Image", type=["jpg","png","jpeg"])
 
 if file:
-    img = Image.open(file)
-    st.image(img, caption="Uploaded Image", use_column_width=True)
+    st.image(file, caption="Uploaded Image", use_column_width=True)
 
     st.write("### 🔍 Prediction:")
-    result = predict(img)
 
-    for r in result:
-        st.write(f"{r[1]} - {round(r[2]*100,2)}%")
+    result = query(file.getvalue())
+
+    if isinstance(result, list):
+        for res in result[:3]:
+            st.write(f"{res['label']} - {round(res['score']*100,2)}%")
+    else:
+        st.write("Error:", result)
