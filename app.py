@@ -3,6 +3,8 @@ from PIL import Image
 import numpy as np
 from ultralytics import YOLO
 
+model = YOLO("yolov8n.pt")
+
 # ---------------- UI ----------------
 st.set_page_config(page_title="AI Object Detector", layout="centered")
 
