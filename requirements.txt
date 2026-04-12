@@ -1,4 +1,4 @@
 streamlit
 pillow
-opencv-python
 ultralytics
+opencv-python-headless==4.8.1.78
