@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 from transformers import pipeline
 import os
+import re
 from datetime import datetime
 
 # ---------------- UI ----------------
@@ -32,14 +33,25 @@ def predict(image):
     return label, confidence
 
 
+def clean_label(label):
+    """Turn user input into a safe folder name (letters, digits, _ and - only).
+
+    Without this, a label like "../../x" could make the app write files
+    outside the dataset/ folder (path traversal).
+    """
+    label = re.sub(r"[^a-z0-9_-]+", "_", label.strip().lower()).strip("_")
+    return label[:50]
+
+
 def save_feedback(image, correct_label):
-    folder = f"dataset/{correct_label}"
+    folder = os.path.join("dataset", correct_label)
     os.makedirs(folder, exist_ok=True)
 
     filename = datetime.now().strftime("%Y%m%d_%H%M%S") + ".jpg"
     path = os.path.join(folder, filename)
 
-    image.save(path)
+    # JPEG cannot store transparency, so convert first (PNGs with alpha would crash)
+    image.convert("RGB").save(path)
     return path
 
 
@@ -78,10 +90,11 @@ if uploaded_file:
         correct_label = st.text_input("Enter correct label (e.g. laptop, dog, cat)")
 
         if st.button("💾 Save Feedback"):
-            if correct_label.strip() == "":
-                st.warning("Please enter correct label")
+            safe_label = clean_label(correct_label)
+            if safe_label == "":
+                st.warning("Please enter a label using letters or numbers")
             else:
-                path = save_feedback(image, correct_label)
+                path = save_feedback(image, safe_label)
                 st.success(f"Saved for training: {path}")
 
     else:
