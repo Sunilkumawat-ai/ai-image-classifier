@@ -1,0 +1,15 @@
+# User feedback uploads
+dataset/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Streamlit / editors / OS
+.streamlit/secrets.toml
+.vscode/
+.idea/
+.DS_Store
