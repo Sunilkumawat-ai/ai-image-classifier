@@ -22,7 +22,8 @@ A Streamlit web app that recognizes what is in a photo using a pretrained **Visi
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 
-<!-- 🔗 **Live demo:** [Open the app](https://sunil-ai-image-classifier-jnnscyx2gm87sbfbhsygp7.streamlit.app/) (free hosting, so the first open can take a minute to wake up) -->
+
+🔗 **Live demo:** [Open the app](https://sunil-ai-image-classifier-jnnscyx2gm87sbfbhsygp7.streamlit.app/) (free hosting, so the first open can take a minute to wake up)
 
 ## ✨ Features
 
